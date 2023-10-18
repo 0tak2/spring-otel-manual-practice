@@ -23,5 +23,5 @@ spring:
 logging:
   level:
     org.hibernate:
-      type.descriptor.sql: trace # ?? ??? ???
+      type.descriptor.sql: trace
     root: debug
