@@ -1,10 +1,7 @@
 package kr.pe.otak2.study.otel.otelmanualinst.entity;
 
 import kr.pe.otak2.study.otel.otelmanualinst.dto.TodoDto;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -22,10 +19,12 @@ public class Todo {
     private Long id;
 
     @Column
+    @Setter
     private String content;
 
     @Column
     @ColumnDefault("false")
+    @Setter
     private boolean isComplete;
 
     @Column
@@ -40,7 +39,7 @@ public class Todo {
         return Todo.builder()
                 .id(dto.getId())
                 .content(dto.getContent())
-                .isComplete(dto.isComplete())
+                .isComplete(dto.getIsComplete())
                 .build();
     }
 }

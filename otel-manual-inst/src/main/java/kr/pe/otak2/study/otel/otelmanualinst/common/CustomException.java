@@ -6,5 +6,5 @@ import lombok.Getter;
 @AllArgsConstructor
 @Getter
 public class CustomException extends RuntimeException {
-    ErrorDetailEnum errorDetail;
+    ErrorDetail errorDetail;
 }
