@@ -1,9 +1,16 @@
 package kr.pe.otak2.study.otel.otelmanualinst.controller;
 
+import io.opentelemetry.api.OpenTelemetry;
+import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.Tracer;
+import io.opentelemetry.context.Scope;
 import kr.pe.otak2.study.otel.otelmanualinst.dto.BasicResponse;
 import kr.pe.otak2.study.otel.otelmanualinst.dto.TodoDto;
 import kr.pe.otak2.study.otel.otelmanualinst.service.TodoService;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -11,18 +18,45 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/todo")
-@AllArgsConstructor
+@Slf4j
 public class ToDoController {
     private final TodoService service;
+    private final Tracer tracer;
+
+    @Autowired
+    public ToDoController(TodoService service, OpenTelemetry openTelemetry) {
+        this.service = service;
+        this.tracer = openTelemetry.getTracer(ToDoController.class.getName(), "0.1.0");
+    }
 
     @PostMapping
     public BasicResponse<TodoDto> newTodoHandler(@RequestBody @Valid TodoDto dto) {
-        return BasicResponse.success(service.addTodo(dto));
+        Span span = tracer.spanBuilder("POST /todo").startSpan();
+
+        TodoDto result = null;
+        try (Scope scope = span.makeCurrent()) {
+            result = service.addTodo(dto);
+            span.setAttribute("new-data", result.toString());
+        } finally {
+            span.end();
+        }
+
+        return BasicResponse.success(result);
     }
 
     @GetMapping("/{todoId}")
     public BasicResponse<TodoDto> getOneTodoHandler(@PathVariable Long todoId) {
-        return BasicResponse.success(service.getTodo(todoId));
+        Span span = tracer.spanBuilder("GET /todo/" + todoId).startSpan();
+
+        TodoDto result = null;
+        try (Scope scope = span.makeCurrent()) {
+            result = service.getTodo(todoId);
+            span.setAttribute("got-data", result.toString());
+        } finally {
+            span.end();
+        }
+
+        return BasicResponse.success(result);
     }
 
     @GetMapping

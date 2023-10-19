@@ -4,12 +4,14 @@ package kr.pe.otak2.study.otel.otelmanualinst.dto;
 import kr.pe.otak2.study.otel.otelmanualinst.entity.Todo;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.ToString;
 
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
 @Builder
 @Getter
+@ToString
 public class TodoDto {
     private Long id;
 
