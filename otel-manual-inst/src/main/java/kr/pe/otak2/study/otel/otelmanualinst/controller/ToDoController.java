@@ -31,32 +31,12 @@ public class ToDoController {
 
     @PostMapping
     public BasicResponse<TodoDto> newTodoHandler(@RequestBody @Valid TodoDto dto) {
-        Span span = tracer.spanBuilder("POST /todo").startSpan();
-
-        TodoDto result = null;
-        try (Scope scope = span.makeCurrent()) {
-            result = service.addTodo(dto);
-            span.setAttribute("new-data", result.toString());
-        } finally {
-            span.end();
-        }
-
-        return BasicResponse.success(result);
+        return BasicResponse.success(service.addTodo(dto));
     }
 
     @GetMapping("/{todoId}")
     public BasicResponse<TodoDto> getOneTodoHandler(@PathVariable Long todoId) {
-        Span span = tracer.spanBuilder("GET /todo/" + todoId).startSpan();
-
-        TodoDto result = null;
-        try (Scope scope = span.makeCurrent()) {
-            result = service.getTodo(todoId);
-            span.setAttribute("got-data", result.toString());
-        } finally {
-            span.end();
-        }
-
-        return BasicResponse.success(result);
+        return BasicResponse.success(service.getTodo(todoId));
     }
 
     @GetMapping
