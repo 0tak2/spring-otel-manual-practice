@@ -5,6 +5,8 @@ import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.context.Scope;
+import kr.pe.otak2.study.otel.otelmanualinst.util.AttributesStore;
+import kr.pe.otak2.study.otel.otelmanualinst.util.TraceHelper;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -20,9 +22,12 @@ import java.util.Arrays;
 @Slf4j
 public class TraceAspect {
     private final OpenTelemetry openTelemetry;
+    private final TraceHelper helper;
+    private  final AttributesStore attributesStore;
 
     @Around("execution(* kr.pe.otak2.study.otel.otelmanualinst.controller.*.*(..))")
     public Object makeParentSpan(ProceedingJoinPoint joinPoint) throws Throwable {
+        log.info("UUID: " + helper.getUUIDofRequest());
         Tracer tracer = openTelemetry.getTracer(joinPoint.getClass().getName(), "0.1.0");
         Span span = tracer.spanBuilder(joinPoint.getSignature().getName()).startSpan();
 
@@ -31,6 +36,7 @@ public class TraceAspect {
             result = joinPoint.proceed();
             span.setAttribute("args", Arrays.toString(joinPoint.getArgs()));
             span.setAttribute("return", result.toString());
+            span = attributesStore.addAttributesTo(joinPoint.getSignature().getName(), span);
         } catch (Throwable t) {
             span.recordException(t);
             throw t;
@@ -53,6 +59,7 @@ public class TraceAspect {
             result = joinPoint.proceed();
             span.setAttribute("args", Arrays.toString(joinPoint.getArgs()));
             span.setAttribute("return", result.toString());
+            span = attributesStore.addAttributesTo(joinPoint.getSignature().getName(), span);
         } catch (Throwable t) {
             span.recordException(t);
             throw t;

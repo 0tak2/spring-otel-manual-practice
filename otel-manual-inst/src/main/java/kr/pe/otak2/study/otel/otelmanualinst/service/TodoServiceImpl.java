@@ -1,16 +1,11 @@
 package kr.pe.otak2.study.otel.otelmanualinst.service;
 
-import io.opentelemetry.api.OpenTelemetry;
-import io.opentelemetry.api.common.Attributes;
-import io.opentelemetry.api.trace.Span;
-import io.opentelemetry.api.trace.Tracer;
-import io.opentelemetry.context.Context;
 import kr.pe.otak2.study.otel.otelmanualinst.common.CustomException;
 import kr.pe.otak2.study.otel.otelmanualinst.common.ErrorDetail;
-import kr.pe.otak2.study.otel.otelmanualinst.controller.ToDoController;
 import kr.pe.otak2.study.otel.otelmanualinst.dto.TodoDto;
 import kr.pe.otak2.study.otel.otelmanualinst.entity.Todo;
 import kr.pe.otak2.study.otel.otelmanualinst.repository.TodoRepository;
+import kr.pe.otak2.study.otel.otelmanualinst.util.AttributesStore;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -18,14 +13,10 @@ import javax.transaction.Transactional;
 import java.util.List;
 
 @Service
+@AllArgsConstructor
 public class TodoServiceImpl implements TodoService {
     private final TodoRepository repository;
-    private final Tracer tracer;
-
-    public TodoServiceImpl(TodoRepository repository, OpenTelemetry openTelemetry) {
-        this.repository = repository;
-        this.tracer = openTelemetry.getTracer(TodoServiceImpl.class.getName(), "0.1.0");
-    }
+    private final AttributesStore attributesStore;
 
     @Override
     @Transactional
@@ -50,7 +41,18 @@ public class TodoServiceImpl implements TodoService {
         List<Todo> todoList = isComplete != null ? repository.findByIsComplete(isComplete)
                 : repository.findAll();
 
-        return todoList.stream().map(TodoDto::from).toList();
+        List<TodoDto> todoDtoList = todoList.stream().map(TodoDto::from).toList();
+
+        attributesStore.storeAttribute(new Object(){}.getClass().getEnclosingMethod().getName(),
+                "countAll",
+                String.valueOf(todoDtoList.size()));
+        attributesStore.storeAttribute(new Object(){}.getClass().getEnclosingMethod().getName(),
+                "countComplete",
+                String.valueOf(
+                        todoDtoList.stream().filter(TodoDto::getIsComplete).toList().size()
+                ));
+
+        return todoDtoList;
     }
 
     @Override
