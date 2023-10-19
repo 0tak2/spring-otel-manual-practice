@@ -1,5 +1,6 @@
 package kr.pe.otak2.study.otel.otelmanualinst.service;
 
+import kr.pe.otak2.study.otel.otelmanualinst.common.ReturnAndAttributes;
 import kr.pe.otak2.study.otel.otelmanualinst.dto.TodoDto;
 
 import java.util.List;
@@ -9,7 +10,7 @@ public interface TodoService {
 
     TodoDto getTodo(Long todoId);
 
-    List<TodoDto> getTodoList(Boolean isComplete);
+    ReturnAndAttributes<List<TodoDto>> getTodoList(Boolean isComplete);
 
     TodoDto updateTodo(Long todoId, TodoDto dto);
 

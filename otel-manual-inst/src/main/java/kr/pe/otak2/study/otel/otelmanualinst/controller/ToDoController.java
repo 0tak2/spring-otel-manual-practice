@@ -41,7 +41,7 @@ public class ToDoController {
 
     @GetMapping
     public BasicResponse<List<TodoDto>> getTodoListHandler(@RequestParam(required = false) Boolean isComplete) {
-        return BasicResponse.success(service.getTodoList(isComplete));
+        return BasicResponse.success(service.getTodoList(isComplete).extract());
     }
 
     @PutMapping("/{todoId}")

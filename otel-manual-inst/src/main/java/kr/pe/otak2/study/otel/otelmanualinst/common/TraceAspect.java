@@ -11,6 +11,8 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.stereotype.Component;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.util.Arrays;
 
@@ -31,6 +33,10 @@ public class TraceAspect {
             result = joinPoint.proceed();
             span.setAttribute("args", Arrays.toString(joinPoint.getArgs()));
             span.setAttribute("return", result.toString());
+
+            if (result instanceof ReturnAndAttributes<?>) {
+                span.setAllAttributes(((ReturnAndAttributes<?>) result).getAttributes());
+            }
         } catch (Throwable t) {
             span.recordException(t);
             throw t;
@@ -53,6 +59,10 @@ public class TraceAspect {
             result = joinPoint.proceed();
             span.setAttribute("args", Arrays.toString(joinPoint.getArgs()));
             span.setAttribute("return", result.toString());
+
+            if (result instanceof ReturnAndAttributes<?>) {
+                span.setAllAttributes(((ReturnAndAttributes<?>) result).getAttributes());
+            }
         } catch (Throwable t) {
             span.recordException(t);
             throw t;

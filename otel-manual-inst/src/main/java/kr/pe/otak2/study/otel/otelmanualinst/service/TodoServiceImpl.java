@@ -1,12 +1,14 @@
 package kr.pe.otak2.study.otel.otelmanualinst.service;
 
 import io.opentelemetry.api.OpenTelemetry;
+import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.context.Context;
 import kr.pe.otak2.study.otel.otelmanualinst.common.CustomException;
 import kr.pe.otak2.study.otel.otelmanualinst.common.ErrorDetail;
+import kr.pe.otak2.study.otel.otelmanualinst.common.ReturnAndAttributes;
 import kr.pe.otak2.study.otel.otelmanualinst.controller.ToDoController;
 import kr.pe.otak2.study.otel.otelmanualinst.dto.TodoDto;
 import kr.pe.otak2.study.otel.otelmanualinst.entity.Todo;
@@ -46,11 +48,25 @@ public class TodoServiceImpl implements TodoService {
 
     @Override
     @Transactional
-    public List<TodoDto> getTodoList(Boolean isComplete) {
+    public ReturnAndAttributes<List<TodoDto>> getTodoList(Boolean isComplete) {
         List<Todo> todoList = isComplete != null ? repository.findByIsComplete(isComplete)
                 : repository.findAll();
 
-        return todoList.stream().map(TodoDto::from).toList();
+        List<TodoDto> todoDtoList = todoList.stream().map(TodoDto::from).toList();
+
+        return ReturnAndAttributes.<List<TodoDto>>builder()
+                .returnValue(todoDtoList)
+                .attributes(
+                        Attributes.of(
+                                AttributeKey.stringKey("countAll"),
+                                String.valueOf(todoDtoList.size()),
+                                AttributeKey.stringKey("countComplete"),
+                                String.valueOf(
+                                        todoDtoList.stream().filter(TodoDto::getIsComplete).toList().size()
+                                )
+                        )
+                )
+                .build();
     }
 
     @Override
